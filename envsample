@@ -1,0 +1,9 @@
+ENV=development
+PORT=1323
+# local
+DB_HOST="127.0.0.1"
+DB_PORT="13326"
+DB_USER="root"
+DB_PASS="password"
+DB_NAME="go-rest-api"
+APP_URL="https://stg-echo.com"
