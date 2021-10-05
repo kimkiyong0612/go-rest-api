@@ -35,7 +35,7 @@ func UserTest(e *httpexpect.Expect) {
 	e.GET("/v1/users").
 		WithJSON(map[string]string{
 			"username": "sample_user",
-		}).Expect().Status(http.StatusOK)
+		}).Expect().Status(http.StatusOK).JSON().Array()
 
 	// update user
 	resp = e.PATCH("/v1/users/" + user1["id"].(string)).
