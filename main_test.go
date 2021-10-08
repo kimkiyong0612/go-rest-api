@@ -64,7 +64,7 @@ func TestMain(t *testing.T) {
 	}
 
 	// connect to coeto
-	db := sqlx.MustConnect("mysql", fmt.Sprintf(
+	migrateDB := sqlx.MustConnect("mysql", fmt.Sprintf(
 		"%s:%s@tcp(%s)/%s?parseTime=true&columnsWithAlias=false&loc=%s",
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASS"),
@@ -77,11 +77,23 @@ func TestMain(t *testing.T) {
 	migrations := &migrate.FileMigrationSource{
 		Dir: "migrations",
 	}
-	if _, err := migrate.Exec(db.DB, "mysql", migrations, migrate.Up); err != nil {
+	if _, err := migrate.Exec(migrateDB.DB, "mysql", migrations, migrate.Up); err != nil {
 		log.Println("[ERROR] Failed to migrate:", err)
 		dropDB()
 		os.Exit(1)
 	}
+	migrateDB.Close()
+
+	// reconnect
+	// if columnsWithAlias=false, don't work sqlx mapping
+	db := sqlx.MustConnect("mysql", fmt.Sprintf(
+		"%s:%s@tcp(%s)/%s?parseTime=true&columnsWithAlias=true&loc=%s",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASS"),
+		fmt.Sprintf("%s:%s", os.Getenv("DB_HOST"), os.Getenv("DB_PORT")),
+		testDB,
+		"Asia%2FTokyo",
+	))
 
 	// create repository
 	repo, err := model.NewSqlxRepository(db)
